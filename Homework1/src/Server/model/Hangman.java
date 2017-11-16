@@ -138,7 +138,7 @@ public class Hangman extends Thread {
         words = new ArrayList<String>();
 
         try {
-            File file = new File("/Users/Chosrat/Desktop/Nätverksprogrammering/Hangman/Server/words.txt");
+            File file = new File("/Users/Chosrat/Desktop/Nätverksprogrammering/Network-Programming/Homework1/words.txt");
             BufferedReader read = new BufferedReader(new FileReader(file));         //BufferedReader.readLine() reads a line of text
             String line;
             try {
