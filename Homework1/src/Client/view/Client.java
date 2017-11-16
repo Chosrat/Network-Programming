@@ -7,9 +7,9 @@ import Client.controller.Controller;
  * Created by Chosrat on 2017-11-16.
  */
 
-public class Client {                   //Client class creates a controller
-    //Calls for the method which creates the client socket/connection
-    ClientConnection cc;                //And the listen for input from the user
+public class Client {                   //Client class skapar en controller
+                                         //Anropar metoden som skapar client socket/connection
+
     Controller controller;
 
 

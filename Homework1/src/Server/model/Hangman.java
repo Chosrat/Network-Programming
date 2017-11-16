@@ -27,7 +27,8 @@ public class Hangman extends Thread {
     public String gameWord;
     public char[] splitGameWord;
     public char[] playResult;
-
+    int step = 0;
+    String guess;
     boolean hitOrMiss;
 
     public Hangman(Socket socket, HangmanServer server) {
@@ -40,12 +41,12 @@ public class Hangman extends Thread {
     public void run() {
 
         try {
-            dataIn = new DataInputStream(socket.getInputStream());
-            dataOut = new DataOutputStream(socket.getOutputStream());
+            dataIn = new DataInputStream(socket.getInputStream());              //Tar input data från klienten
+            dataOut = new DataOutputStream(socket.getOutputStream());           // Output för att skriva till klienten
             dataOut.writeUTF("Welcome to Hangman game, to play input 'yes' or to exit input 'quit' ");
             dataOut.flush();
 
-            while (true) {
+            while (true) {                                                      //Om det inte finns data i dataIn från klient går tråden i sömn
                 while (dataIn.available() == 0) {
                     try {
                         Thread.sleep(1);
@@ -53,7 +54,7 @@ public class Hangman extends Thread {
                         e.printStackTrace();
                     }
                 }
-                String input = dataIn.readUTF();
+                String input = dataIn.readUTF();                        //Startar spelet
                 if (input.equalsIgnoreCase("yes")) {
                     startGame();
                 }
@@ -65,14 +66,13 @@ public class Hangman extends Thread {
     }
 
 
-    public void startGame() {
-        hangManWord();
-        gameWord = randomWord();
-        splitGameWord = gameWord.toCharArray();
-        playResult = new char[splitGameWord.length];
-        guesses = splitGameWord.length;
-        String guess;
-        System.out.println(gameWord); //Skriver ut ordet i systemets command line för testa hela ordet.
+    public void startGame() {                            //Hangman spelet
+        hangManWord();                                   //Skapar en lista med olika ord
+        gameWord = randomWord();                         //Plockar ut ett slumpmässigt ord från listan
+        splitGameWord = gameWord.toCharArray();         //Konventerar ordet till en charArray
+        playResult = new char[splitGameWord.length];    //Skapar en tom charArray med längden av spelordet där rätt bokstav sparas
+        guesses = splitGameWord.length;                 //Antal gissningar
+        System.out.println(gameWord);                    //Skriver ut ordet i systemets command line för testa hela ordet.
 
         try {
             dataOut.writeUTF("Start game: \nYou have " + (splitGameWord.length) + " guesses and the word has " + splitGameWord.length + " letters " +
@@ -82,43 +82,64 @@ public class Hangman extends Thread {
             e.printStackTrace();
         }
 
-        try {
+        try {   //Om det finns något i dataIn dvs om användaren har matat in ett ord eller bokstad och om det finns gissningar kvar
             while ((guess = dataIn.readUTF()) != null && guesses != 1) {
 
                 if (guess.length() == 1) {
-
+                    //Om användaren gissat 1 bokstav skickas den iväg tillsammans med spelordet för att se om den får träff eller inte
                     playResult = guessChar(guess.charAt(0), playResult, splitGameWord);
 
-
-                    if (hitOrMiss == false) {
-                        guesses--;
+                    //kollar Om bokstaven som matades skapade resten av ordet
+                    if (new String(playResult).equalsIgnoreCase(gameWord)) {
+                        step = 1;
                     }
 
-                    dataOut.writeUTF(Arrays.toString(playResult) + "\nYou have " + guesses + " guesses left");
-                    dataOut.flush();
+                    switch (step) {
+                        case 0:
+                            //Om bokstaven inte finns i order
+                            if (hitOrMiss == false) {
+                                guesses--;
+                            }
 
+                            dataOut.writeUTF(Arrays.toString(playResult) + "\nYou have " + guesses + " guesses left");
+                            dataOut.flush();
+                            break;
+
+                        case 1:
+                            //Om bokstaven fanns i ordet och ordet blev komplett då avslutas spelet
+                            step = 0;
+                            scoreBoard++;
+                            dataOut.writeUTF("Congratulations you guessed the correct word. \nYour score is: " + scoreBoard +
+                                    "\nDo you want to restart the game write yes or quit to exit");
+                            dataOut.flush();
+
+                            if ((guess = dataIn.readUTF()).equalsIgnoreCase("yes")) {
+                                startGame();
+                            }
+                            break;
+                    }
                 }
 
-                if (guess.length() > 1) {
+                if (guess.length() > 1) {   //Om användaren gissar på hela ordet
                     if (guess.equalsIgnoreCase(gameWord)) {
                         scoreBoard++;
                         dataOut.writeUTF("Congratulations you guessed the correct word. " + guess + "\nYour score is: " + scoreBoard);
+                        dataOut.writeUTF("Do you want to restart the game write yes or quit to exit");
                         dataOut.flush();
-
-                    }
-                    dataOut.writeUTF("Do you want to restart the game write yes or quit to exit");
-                    dataOut.flush();
-                    if ((guess = dataIn.readUTF()).equalsIgnoreCase("yes")) {
-                        startGame();
+                        if ((guess = dataIn.readUTF()).equalsIgnoreCase("yes")) {
+                            startGame();
+                        }
                     } else {
-                        dataOut.writeUTF("FAAAAAIL!!! try again");
-                        dataOut.flush();
                         guesses--;
+                        dataOut.writeUTF("FAAAAAIL!!! try again");
+                        dataOut.writeUTF(Arrays.toString(playResult) + "\nYou have " + guesses + " guesses left");
+                        dataOut.flush();
                     }
 
                 }
 
             }
+            //Startar om eller avslutar spelet
             scoreBoard--;
             dataOut.writeUTF("You have no guesses left \nYour score is: " + scoreBoard + "\nTo restart the game write yes or quit to exit");
             dataOut.flush();
@@ -134,7 +155,7 @@ public class Hangman extends Thread {
     }
 
 
-    public void hangManWord() { //Tar filen words.txt och kopierar alla ord till en ordlista
+    public void hangManWord() {         //Tar filen words.txt och kopierar alla ord till en ordlista
         words = new ArrayList<String>();
 
         try {
@@ -163,16 +184,16 @@ public class Hangman extends Thread {
     }
 
 
-    public char[] guessChar(char guess, char[] emptyWord, char[] word) {
-        hitOrMiss = false;
+    public char[] guessChar(char guess, char[] progressionWord, char[] word) {    //Tar in en bookstav och ser om den finns i ordet
+        hitOrMiss = false;                                                  //Använder boolean för att minsta på antal gissnings försök
         for (int i = 0; i < word.length; i++) {
             if (word[i] == guess) {
                 hitOrMiss = true;
-                emptyWord[i] = guess;
+                progressionWord[i] = guess;
             }
 
         }
-        return emptyWord;
+        return progressionWord;
     }
 
 }

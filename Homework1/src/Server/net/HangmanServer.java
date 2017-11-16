@@ -26,17 +26,14 @@ public class HangmanServer {
     public HangmanServer() {
 
         try {
-            socket = new ServerSocket(3333); //Listening for new connections in port 3333
+            socket = new ServerSocket(3333); //Kollar efter nya uppkopplingar i porten 3333
             while (true) {
 
-                Socket s = socket.accept();
-                controller = new Controller();
-                controller.CreateHangman(s, this);
+                Socket s = socket.accept();         //Accepterar uppkopplingen
+                controller = new Controller();      //Skapar ny kontroller som hantera den klienten
+                controller.CreateHangman(s, this);  //Kopplar klienten till spelet
 
-
-                //Hangman game = new Hangman(s, this);
-                //game.start();
-                clients.add(controller);
+                clients.add(controller);            //Lägger till kopplingen i en lista
             }
         } catch (IOException e) {
             e.printStackTrace();
