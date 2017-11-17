@@ -1,6 +1,5 @@
 package Client.view;
 
-import Client.client.ClientConnection;
 import Client.controller.Controller;
 
 /**
@@ -8,7 +7,7 @@ import Client.controller.Controller;
  */
 
 public class Client {                   //Client class skapar en controller
-                                         //Anropar metoden som skapar client socket/connection
+                                         //Anropar metoden som skapar net socket/connection
 
     Controller controller;
 

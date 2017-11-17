@@ -1,4 +1,4 @@
-package Client.client;
+package Client.net;
 
 /**
  * Created by Chosrat on 2017-11-16.

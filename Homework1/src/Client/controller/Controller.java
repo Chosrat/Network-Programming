@@ -1,6 +1,6 @@
 package Client.controller;
 
-import Client.client.ClientConnection;
+import Client.net.ClientConnection;
 
 /**
  * Created by Chosrat on 2017-11-16.
