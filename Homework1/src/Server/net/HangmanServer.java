@@ -38,6 +38,5 @@ public class HangmanServer {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 }

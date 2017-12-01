@@ -128,9 +128,11 @@ public class ServerConnect implements Runnable{
         //  System.out.println("clienten messageHandler");
     }
     //Avslutar uppkopplingen till servern
+
     public void disConnect() throws IOException{
+
         socketChannel.close();
         socketChannel.keyFor(selector).cancel();
-
+        System.out.println("Connection closed,");
     }
 }
