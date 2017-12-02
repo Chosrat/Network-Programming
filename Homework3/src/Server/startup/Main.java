@@ -28,6 +28,7 @@ public class Main {
             new Main().startRegistry();
             //new DbHandler().accessDb();
             Naming.rebind(Controller.SERVER_NAME_IN_REGISTRY, new Controller());
+            System.out.println("Server running");
         } catch (MalformedURLException|RemoteException  e) {
             e.printStackTrace();
         }

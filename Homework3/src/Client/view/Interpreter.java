@@ -33,6 +33,7 @@ public class Interpreter implements Runnable {
     private InputStream inputStream;
 
     public Interpreter() {
+        user = new UserCredentials(null, null);
     }
 
     public void start() {
@@ -46,8 +47,8 @@ public class Interpreter implements Runnable {
         } catch (RemoteException | NotBoundException | MalformedURLException e) {
             e.printStackTrace();
         }
-        System.out.println("Choose action - type one of the following (login, logout, newuser, deleteuser, listfiles, quit)");
-
+        //System.out.println("Choose action - type one of the following (login, logout, newuser, deleteuser, listfiles, quit)");
+        System.out.println("File system! \n\nType login to start: ");
         while (true) {
             String choice = input.nextLine();
             try {
@@ -55,6 +56,7 @@ public class Interpreter implements Runnable {
 
                     case "login":
                         login();
+                        chooseAction();
                         break;
 
                     case "logout":
@@ -62,41 +64,43 @@ public class Interpreter implements Runnable {
 
                     case "newuser":
                         newUser();
+                        System.out.println("Choose action - type one of the following (logout, listfiles, downloadfile, uploadfile, deletefile, newuser, deleteuser, quit)");
                         break;
 
                     case "deleteuser":
-                        deleteUser();
+                        if(user.getStatus() == true) {
+                            deleteUser();
+                        }else System.out.println("You have to be logged in to delete user; type login to login: ");
                         break;
 
                     case "uploadfile":
-                        server.startFileServerSocket();
-                        connectToFileServer();
-                        server.serverSocketAccept();
-                        uploadFile("/Users/Chosrat/Desktop/Nätverksprogrammering/Network-Programming/Homework3/id1212-hw3-2.pdf");
-                        fileAttributes();
+                        uploadFile();
                         if(server.serverUploadFile(fileCredentials) == true){
                             System.out.println("Filename already exists in databse please try again: \n\n");
                             break;
                         }else System.out.println("File upploaded to database");
+                        chooseAction();
                         break;
 
                     case "downloadfile":
-                        System.out.println("NAme of the file you want to download");
-                        fileCredentials.setFileName(input.nextLine());
-                        fileCredentials.setOwnerId(user.getId());
-                        server.startFileServerSocket();
-                        connectToFileServer();
-                        server.serverSocketAccept();
-                        server.downloadFile(fileCredentials);
-                        downloadFile();
+                        if(user.getStatus() == true) {
+                            downloadFile();
+                        }else System.out.println("You have to be logged in to download files, type login to login: ");
+                        chooseAction();
                         break;
 
                     case "listfiles":
-                        System.out.println(server.listFiles(user));
+                        if(user.getStatus() == true) {
+                            System.out.println(server.listFiles(user));
+                        } else System.out.println("You have to be logged in to read the files, type login to login: ");
+                        chooseAction();
                         break;
 
                     case "deletefile":
-                        deleteFile();
+                        if(user.getStatus() == true) {
+                            deleteFile();
+                        } else System.out.println("You have to be logged in to delete files, type login to login");
+                        chooseAction();
                         break;
                 }
             } catch (Exception e) {
@@ -106,8 +110,12 @@ public class Interpreter implements Runnable {
 
     }
 
+    private void chooseAction(){
+        System.out.println("Choose action - type one of the following (logout, listfiles, downloadfile, uploadfile, deletefile, newuser, deleteuser, quit)");
+    }
+
     private void deleteFile() throws RemoteException, SQLException {
-        System.out.println("Name the file you want to delete");
+        System.out.println("Name of the file you want to delete");
         fileCredentials.setFileName(input.nextLine());
         fileCredentials.setOwnerId(user.getId());
         System.out.println(server.deleteFile(fileCredentials));
@@ -161,9 +169,17 @@ public class Interpreter implements Runnable {
         socket = new Socket("localhost", 3333);
     }
 
-    private void uploadFile(String path) throws IOException, SQLException {
-        //fileAttributes();
-        File theFile = new File(path);
+    private void socketConnect() throws IOException {
+        server.startFileServerSocket();
+        connectToFileServer();
+        server.serverSocketAccept();
+    }
+
+    private void uploadFile() throws IOException, SQLException {
+        socketConnect();
+        fileAttributes();
+        System.out.println("Enter the path for the file you want to upload");
+        File theFile = new File(input.nextLine());
         byteArray = new byte[(int) theFile.length()];
         file = new FileInputStream(theFile);
         bufferedInputStream = new BufferedInputStream(file);
@@ -177,9 +193,14 @@ public class Interpreter implements Runnable {
         socket.close();
     }
 
-    public void downloadFile() throws IOException {
-        System.out.println("Give a name to the file you want to store on your computer" );
-        File theFile = new File(input.nextLine() + ".pdf");
+    public void downloadFile() throws IOException, SQLException, ClassNotFoundException {
+        socketConnect();
+        System.out.println("NAme of the file you want to download");
+        fileCredentials.setFileName(input.nextLine());
+        fileCredentials.setOwnerId(user.getId());
+        server.downloadFile(fileCredentials);
+        System.out.println("Save as: " );
+        File theFile = new File(input.nextLine() );
         fileOutputStream = new FileOutputStream(theFile);
         inputStream = socket.getInputStream();
         byte[] buffer = new byte[4096];
@@ -187,12 +208,12 @@ public class Interpreter implements Runnable {
             fileOutputStream.write(buffer);
         }
         socket.close();
+        System.out.print("Download complete");
     }
 
-    //fixa sista if satsen så att den rättar vid fel
+
     private void fileAttributes() throws SQLException, RemoteException {
         System.out.println("Name of your file");
-      //  fileCredentials = new FileCredentials();
         fileCredentials.setFileName(input.nextLine());
         fileCredentials.setOwnerId(user.getId());
         System.out.println("Do you want the file to be public yes or no?: \n");
