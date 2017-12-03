@@ -21,7 +21,6 @@ public class Controller extends UnicastRemoteObject implements FileServer {
 
     private UserHandler userHandler = new UserHandler();
     private FileTransferServer fileTransferServer = new FileTransferServer();
-    private Main main = new Main();
 
     public Controller() throws RemoteException, SQLException, ClassNotFoundException {
     }

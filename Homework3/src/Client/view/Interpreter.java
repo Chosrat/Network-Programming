@@ -63,6 +63,7 @@ public class Interpreter implements Runnable {
                         break;
 
                     case "logout":
+                        logout();
                         break;
 
                     case "newuser":
@@ -111,6 +112,14 @@ public class Interpreter implements Runnable {
             }
         }
 
+    }
+
+    private void logout() {
+        if(user.getStatus() == false){
+            System.out.println("You are already logged out");
+        }else if(user.getStatus() == true){
+            System.out.println("You are logged out");
+        }
     }
 
     //Printout som meddelar användaren vilka funktioner som de har tillgång till
@@ -224,7 +233,7 @@ public class Interpreter implements Runnable {
             fileOutputStream.write(buffer);
         }
         socket.close();
-        System.out.print("Download complete");
+        System.out.println("Download complete");
     }
 
     //Sätter attribut för filen som ska laddas upp.
