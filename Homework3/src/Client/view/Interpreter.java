@@ -36,10 +36,14 @@ public class Interpreter implements Runnable {
         user = new UserCredentials(null, null);
     }
 
+    //Startar en tråd för att dra igång klienten
     public void start() {
         new Thread(this).start();
     }
 
+
+    //Användaren får olika val och beroende på val så anropas berörd funktion
+    //Tittar även om användaren är online för att se om de har tillgång till funktionerna
     @Override
     public void run() {
         try {
@@ -47,7 +51,6 @@ public class Interpreter implements Runnable {
         } catch (RemoteException | NotBoundException | MalformedURLException e) {
             e.printStackTrace();
         }
-        //System.out.println("Choose action - type one of the following (login, logout, newuser, deleteuser, listfiles, quit)");
         System.out.println("File system! \n\nType login to start: ");
         while (true) {
             String choice = input.nextLine();
@@ -110,10 +113,12 @@ public class Interpreter implements Runnable {
 
     }
 
+    //Printout som meddelar användaren vilka funktioner som de har tillgång till
     private void chooseAction(){
         System.out.println("Choose action - type one of the following (logout, listfiles, downloadfile, uploadfile, deletefile, newuser, deleteuser, quit)");
     }
 
+    //Tar emot input från användaren, vilken fil de vill ta bort och skickar detta vidare till servern
     private void deleteFile() throws RemoteException, SQLException {
         System.out.println("Name of the file you want to delete");
         fileCredentials.setFileName(input.nextLine());
@@ -121,6 +126,7 @@ public class Interpreter implements Runnable {
         System.out.println(server.deleteFile(fileCredentials));
     }
 
+    //Användaren tar bort sin egen profil från databasen, skickar detta vidare till servern
     private void deleteUser() throws RemoteException, SQLException {
         if (user.getStatus() == true) {
             System.out.println("Are you sure you want to delete this user\n YES or NO");
@@ -131,6 +137,7 @@ public class Interpreter implements Runnable {
         } else System.out.println("You have to be logged in to delete user \nTry another action:");
     }
 
+    //Tar emot användarens lösenord och användarnamn för att verifera inloggningen och sätter sedan derras "session" status till true om de lyckas logga in
     public void login() throws RemoteException, SQLException {
         System.out.println("Username: ");
         userName = input.nextLine();
@@ -145,6 +152,8 @@ public class Interpreter implements Runnable {
         }
     }
 
+    //Användare registrerar sig som ny "user" i databasen,
+    //Tar in användarnamn och lösenord och skickar till servern för hantering
     public void newUser() throws RemoteException, SQLException {
         System.out.println("Choose username: ");
         userName = input.nextLine();
@@ -165,16 +174,20 @@ public class Interpreter implements Runnable {
         System.out.println("Conected to server");
     }
 
+    //kopplar upp till serverns socket för att skicka och ta emot filer
     private void connectToFileServer() throws IOException {
         socket = new Socket("localhost", 3333);
     }
 
+    //Skickar en signal till servern för att starta serversocket när användaren vill ladda up eller ladda ner en fil
     private void socketConnect() throws IOException {
         server.startFileServerSocket();
         connectToFileServer();
         server.serverSocketAccept();
     }
 
+    //När användaren vill ladda upp fil, anropar på socket funktioner och skapar en anslutning
+    //Tar sedan in adressen till filen och sparrar den i en bytearray och skickar detta till servern genom outputstream
     private void uploadFile() throws IOException, SQLException {
         socketConnect();
         fileAttributes();
@@ -193,6 +206,9 @@ public class Interpreter implements Runnable {
         socket.close();
     }
 
+    //Skapar socket anslutning för att ladda ner fil. användaren skriver in vilken fil de vill ladda ner,
+    //En signal sänds till servern och den hanterar detta och skickar filen.
+    //Tar emot filen och sparar den i andvändarens dator genom fileoutputstream
     public void downloadFile() throws IOException, SQLException, ClassNotFoundException {
         socketConnect();
         System.out.println("NAme of the file you want to download");
@@ -211,7 +227,7 @@ public class Interpreter implements Runnable {
         System.out.print("Download complete");
     }
 
-
+    //Sätter attribut för filen som ska laddas upp.
     private void fileAttributes() throws SQLException, RemoteException {
         System.out.println("Name of your file");
         fileCredentials.setFileName(input.nextLine());

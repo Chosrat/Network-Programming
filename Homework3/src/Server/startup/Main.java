@@ -29,22 +29,18 @@ public class Main {
             //new DbHandler().accessDb();
             Naming.rebind(Controller.SERVER_NAME_IN_REGISTRY, new Controller());
             System.out.println("Server running");
-        } catch (MalformedURLException|RemoteException  e) {
+        } catch (MalformedURLException | RemoteException e) {
             e.printStackTrace();
         }
     }
 
-    private void startRegistry() throws RemoteException{
+    private void startRegistry() throws RemoteException {
 
         try {
             LocateRegistry.getRegistry().list();
-        }catch (RemoteException noRegistryIsRunning) {
+        } catch (RemoteException noRegistryIsRunning) {
             LocateRegistry.createRegistry(Registry.REGISTRY_PORT);
         }
-    }
-
-    public void list() throws RemoteException {
-
     }
 
 }

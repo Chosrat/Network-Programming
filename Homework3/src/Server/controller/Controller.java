@@ -17,11 +17,10 @@ import java.sql.SQLException;
 /**
  * Created by Chosrat on 2017-11-28.
  */
-public class Controller extends UnicastRemoteObject implements FileServer{
+public class Controller extends UnicastRemoteObject implements FileServer {
 
     private UserHandler userHandler = new UserHandler();
     private FileTransferServer fileTransferServer = new FileTransferServer();
-    private DbHandler dbHandler = new DbHandler();
     private Main main = new Main();
 
     public Controller() throws RemoteException, SQLException, ClassNotFoundException {
@@ -49,9 +48,7 @@ public class Controller extends UnicastRemoteObject implements FileServer{
 
     @Override
     public String listFiles(UserCredentials user) throws RemoteException, SQLException {
-        main.list();
         return userHandler.listFiles(user);
-
     }
 
     @Override

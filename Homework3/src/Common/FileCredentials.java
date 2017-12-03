@@ -5,7 +5,9 @@ import java.io.Serializable;
 /**
  * Created by Chosrat on 2017-11-30.
  */
-public class FileCredentials implements Serializable{
+
+//En klass för att hantera filens attribut
+public class FileCredentials implements Serializable {
 
     private int ownerId;
     private String fileName;

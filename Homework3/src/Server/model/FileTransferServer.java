@@ -21,50 +21,49 @@ public class FileTransferServer {
     DbHandler dbHandler = new DbHandler();
     OutputStream outputStream;
 
-    //Startar en socket server för att ta emot och skicka filer.
+
     public FileTransferServer() {
     }
 
+    //Startar en socket server för att ta emot och skicka filer.
     public void startFilesServerSocket() throws IOException {
         serverSocket = new ServerSocket(3333);
     }
 
+    //Tar emot anslutningsförfrågan från klienten och skapar anslutning
     public void serverSocketAccept() throws IOException {
         socket = serverSocket.accept();
         System.out.println("Server accepted socket");
     }
 
-
+    //Tar emot filen som skickades från klienten och skickar den vidare till databashanteraren
     public boolean uploadFile(FileCredentials credentials) throws IOException, ClassNotFoundException, SQLException {
         boolean checkName = true;
         inputStream = socket.getInputStream();
         System.out.println(inputStream.available());
         if (inputStream.available() != 0) {
-            System.out.println("innan uppload i run");
-           checkName = uploadToDb(inputStream, credentials);
+            checkName = uploadToDb(inputStream, credentials);
         }
         socket.close();
         serverSocket.close();
         return checkName;
     }
 
+    //Tar emot filen från databashanteraren och skickar den vidare till klienten
     public void downloadFile(FileCredentials credentials) throws IOException, SQLException, ClassNotFoundException {
-        System.out.println("Filestransfet sserver downladfile");
         InputStream theFile = dbHandler.downloadFile(credentials);
         outputStream = socket.getOutputStream();
         byte[] buffer = new byte[4096];
         while (theFile.read(buffer) > 0) {
-            System.out.println("FTS if satsen skickar till client");
             outputStream.write(buffer);
         }
         outputStream.flush();
-        System.out.println("Efter flush");
         socket.close();
         serverSocket.close();
     }
 
+    //Tar emot filecredentials och filen från klienten och skickar detta vidare till databashanteraren
     private boolean uploadToDb(InputStream inputStream, FileCredentials credentials) throws FileNotFoundException, SQLException, ClassNotFoundException {
-        System.out.println("skickar till dbHandler från FTS");
         return dbHandler.uploadFile(inputStream, credentials);
     }
 

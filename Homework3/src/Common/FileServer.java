@@ -9,6 +9,8 @@ import java.sql.SQLException;
 /**
  * Created by Chosrat on 2017-11-28.
  */
+
+//interface som listar funktioner mellan klient och server
 public interface FileServer extends Remote {
 
     public static final String SERVER_NAME_IN_REGISTRY = "FILE_SERVER";
