@@ -129,7 +129,7 @@ public class DbHandler {
         return fileNames.toString();
     }
 
-    //Låter användare ta bort egna filer eller publika filer
+    //Låter användare ta bort egna filer eller publika filer..
     public String deleteFile(FileCredentials fileCredentials) throws SQLException {
         deleteFile.setString(1, fileCredentials.getFileName());
         deleteFile.setInt(2, fileCredentials.getOwnerId());
