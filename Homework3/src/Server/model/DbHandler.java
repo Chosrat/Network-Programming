@@ -86,9 +86,8 @@ public class DbHandler {
         }
         uploadFile.setInt(1, credentials.getOwnerId());
         uploadFile.setString(2, credentials.getFileName());
-        uploadFile.setInt(3, 123123);
-        uploadFile.setBoolean(4, credentials.isPublik());
-        uploadFile.setBlob(5, path);
+        uploadFile.setBoolean(3, credentials.isPublik());
+        uploadFile.setBlob(4, path);
         uploadFile.executeUpdate();
         System.out.println("ExecuteUpdate");
         return false;
@@ -150,7 +149,7 @@ public class DbHandler {
         getAllUsers = connection.prepareStatement("SELECT * FROM user ");
         deleteUser = connection.prepareStatement("DELETE FROM user WHERE username =? AND password =?");
         login = connection.prepareStatement("SELECT id FROM user WHERE username = ? AND password = ?");
-        uploadFile = connection.prepareStatement("INSERT INTO Files (id, name, size, publik, file) VALUES (?, ?, ?, ?, ?) ");
+        uploadFile = connection.prepareStatement("INSERT INTO Files (id, name, publik, file) VALUES (?, ?, ?, ?) ");
         listFiles = connection.prepareStatement("SELECT * FROM Files WHERE (publik = 1 OR id = ?)");
         getFileName = connection.prepareStatement("SELECT * FROM Files");
         downloadFile = connection.prepareStatement("SELECT file FROM Files WHERE name = ? AND (publik = 1 OR id = ?)");
